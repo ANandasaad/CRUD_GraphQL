@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useQuery, gql, useLazyQuery } from "@apollo/client";
+import { useQuery, gql, useLazyQuery, useMutation } from "@apollo/client";
 
 const QUERY_ALL_USERS = gql`
   query GetAllUsers {
@@ -33,14 +33,34 @@ const GET_MOVIES = gql`
   }
 `;
 
+const CREATE_USER = gql`
+ mutation CreateUser($input:UserInput!){
+    createUser(input:$input)
+    {
+       name
+       age
+       nationality
+       username
+    }
+ }
+
+`;
+
 const DisplayData = () => {
-  const { loading, data, error } = useQuery(QUERY_ALL_USERS);
+  const { loading, data, refetch} = useQuery(QUERY_ALL_USERS);
   const { data: movie } = useQuery(QUERY_ALL_MOVIES);
 
   const [searchMovie, setMovie] = useState("");
   const [userdata, setUser] = useState("");
   const [fetchMovie, { data: Moviedata, error: Movie_error }] =
     useLazyQuery(GET_MOVIES);
+
+  const [createUserDetails] = useMutation(CREATE_USER);
+ const [name,setName]=useState('');
+ const [age,setAge]=useState('');
+ const [username,setUsername]=useState('');
+ const [nationality,setNationality]=useState('');
+
 
   if (movie) {
     console.log(movie);
@@ -52,10 +72,6 @@ const DisplayData = () => {
   if (data) {
     console.log(data);
   }
-  if (error) {
-    return <h1>{error.status || error.message}</h1>;
-  }
-
  
 
   const list = data.users.map((items) => (
@@ -78,6 +94,45 @@ const DisplayData = () => {
   return (
     <>
       <div>DisplayData</div>
+      <div>
+        <input
+          type="text"
+          placeholder="Name.."
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <input
+          type="number"
+          placeholder="Age.."
+          value={age}
+          onChange={(e) => setAge(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Username.."
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Nationality.."
+          value={nationality}
+          onChange={(e) => setNationality(e.target.value.toUpperCase())}
+        />
+        <button
+          onClick={() => {
+            createUserDetails({
+              variables: {
+                input: { name, username, age:Number(age), nationality },
+              },
+            });
+            refetch();
+          }}
+        >
+          Create User{" "}
+        </button>
+      </div>
+
       <div>{list}</div>
       <div>{MovieList}</div>
       <input
@@ -105,8 +160,7 @@ const DisplayData = () => {
           </div>
         )}
 
-        {Movie_error&&<h1>Error try it again</h1>}
-       
+        {Movie_error && <h1>Error try it again</h1>}
       </div>
     </>
   );

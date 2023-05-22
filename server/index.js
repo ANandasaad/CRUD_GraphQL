@@ -3,13 +3,29 @@
  import typeDefs from './schema/type-defs.js';
  import resolvers from './schema/resolvers.js';
 
+import mongoose from 'mongoose';
+
+import { MONGO_URL } from './config.js';
+
 
 
  
 const server = new ApolloServer({
     typeDefs,
-    resolvers
+    resolvers,
+    
 });
 
-const { url } = await startStandaloneServer(server);
-console.log(`🚀 Server ready at ${url}`);
+mongoose.connect(MONGO_URL,{useNewUrlParser:true}).then(()=>{
+    console.log("Mongodb connection successful");
+    return  startStandaloneServer(server,{
+      listen:{
+        port:5000
+      }
+    })
+}).then((res)=>{
+    console.log(`Server runninh at ${res.url}`);
+})
+
+// const { url } = await startStandaloneServer(server);
+// console.log(`🚀 Server ready at ${url}`);

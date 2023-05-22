@@ -2,7 +2,7 @@ import gql from "graphql-tag";
 
 const typeDefs = gql`
   type User {
-    id: ID!
+    id:ID!
     name: String!
     username: String!
     age: Int!

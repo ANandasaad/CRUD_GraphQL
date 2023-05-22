@@ -1,17 +1,37 @@
-import { UserList, MovieList } from "../FakeData.js";
+import {  MovieList } from "../FakeData.js";
+import UserList from "./database.js";
 
 
-let fakeArray = UserList
 
 const resolvers = {
   Query: {
-    users: () => {
-      return UserList;
+    users: async () => {
+      try{
+        const user= await UserList.find();
+        return user;
+      }
+      catch(error)
+      {
+        console.log(error);
+      }
+      
+        
+      
     },
-    user: (_, args) => {
-      const id = args.id;
-      const user = UserList.find((obj) => obj.id == id);
-      return user;
+    user:  async (_, args) => {
+      try{
+        const id = args.id;
+        const user= await UserList.findById(id);
+     
+        return user;
+      }
+      catch(error){
+         console.log(error);
+      }
+     
+     
+        
+      
     },
 
     movies: () => {
@@ -33,14 +53,26 @@ const resolvers = {
   },
 
   Mutation: {
-    createUser: (_, args) => {
-      const user = args.input;
-      console.log(user);
-      const lastId = UserList[UserList.length - 1].id;
-      user.id = lastId + 1;
+    createUser: async(_, args) => {
+      const {name,username,age,nationality} = args.input;
+       const users=new UserList({
+        name:name,
+        username:username,
+        age:age,
+        nationality:nationality
+       })
 
-      UserList.push(user);
-      return user;
+       const res= await users.save();
+
+       return {
+        id:res.id,
+        ...res._doc
+       }
+      
+      // const lastId = UserList[UserList.length - 1].id;
+      // user.id = lastId + 1;
+
+   
     },
 
     updateUsername: (_, args) => {
